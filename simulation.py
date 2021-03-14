@@ -104,8 +104,8 @@ while(not done):
     if(currentTimeStep > steps -1):
         done = True
         print("Simulation Complete")
+        print("Total Timesteps: " + str(steps))
         print("Execution Time: - %s seconds -" % (TIME.time() - start_time))
-
 
 #plot results
 def plotResults():
