@@ -3,6 +3,7 @@ import random
 from traders import traderDemand
 
 from brownian import gmbrownian
+from randWalk import randWalk
 
 
 class Environment:
@@ -15,9 +16,9 @@ class Environment:
         # tightest bid/ask from last timestep, current ref price, 
         self.refPriceConfig = refPriceConfig
         #init ref prices over time (ref price is independent of all agent actions and environment state.)
-        self.refPrices = gmbrownian(
-            refPriceConfig["step"], 
-            refPriceConfig["time"],
+        steps = refPriceConfig["time"]/refPriceConfig["step"] 
+        self.refPrices = randWalk(
+            int(steps),
             refPriceConfig["drift"],
             refPriceConfig["volatility"],
             refPriceConfig["initValue"]
