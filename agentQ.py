@@ -140,6 +140,7 @@ class AgentQ():
             elif(actionIndex==6): actionIndex = actionIndex+2
         else:
             actionIndex = qOptions.argmax() #chosen action
+        maxActionIndex = actionIndex
         #explore or exploit
         if(self.qLearningConfig["mu"] < random.random()):
             if(restrict_ask and restrict_bid):
@@ -151,8 +152,9 @@ class AgentQ():
             else:
                 actionIndex = random.randrange(8)
         actionValue = qOptions[actionIndex]
+        maxActionValue = qOptions[maxActionIndex]
         self.actions.append([actionIndex,actionValue])
-        return actionIndex, actionValue
+        return actionIndex, actionValue, maxActionIndex, maxActionValue
 
 
     def quote(self, price, competitorSpread):
@@ -164,11 +166,11 @@ class AgentQ():
         oldBid = self.spread[-1][0]
         oldAsk = self.spread[-1][1]
 
-        #observable state
+        #observable state for bid and ask ratios
         bidRatio = (competitorSpread["bid"]-oldBid)/price
         askRatio = (oldAsk-competitorSpread["ask"])/price
-        inventory = self.inventory[-1]
 
+        inventory = self.inventory[-1]
         stateIndex = self.selectStateIndex(inventory,bidRatio,askRatio)
         #update with current (pre trade) state
 
@@ -185,7 +187,7 @@ class AgentQ():
             restrict_ask = False
 
         self.states.append(stateIndex)
-        actionIndex, actionValue = self.pickAction(stateIndex, restrict_bid, restrict_ask)
+        actionIndex, actionValue, maxActionIndex, maxActionValue  = self.pickAction(stateIndex, restrict_bid, restrict_ask)
 
         #move bid/ask based on state and Q
         nudgeConstant = self.qLearningConfig["nudge"]
@@ -258,8 +260,10 @@ class AgentQ():
             restrict_ask = True
         else:
             restrict_ask = False
+        actionIndex, actionValue, maxActionIndex, maxActionValue  = self.pickAction(stateIndex,restrict_bid, restrict_ask)
 
-        actionIndex, actionValue = self.pickAction(stateIndex, restrict_bid, restrict_ask)
+        epsilon_bid = self.spreadRatios[-1][0]
+        epsilon_ask = self.spreadRatios[-1][1]
 
         # print("state: ")
         # print(stateIndex)
@@ -272,14 +276,13 @@ class AgentQ():
         gamma = self.qLearningConfig["gamma"] #discount factor
         alpha = self.qLearningConfig["alpha"] #learning rate
 
-        reward = self.profit[-1]-self.profit[-2] #+ (self.inventory[-2]-self.inventory[-1])*price #profit made from last step
-        #reward = max(self.profit[-1]-self.profit[-2],0)
-        self.rewards.append(reward)
-        #if(reward==0): reward = -1
+        reward = self.profit[-1]-self.profit[-2] #profit made from last step
         #calc temporal difference
-        TD = reward + gamma*actionValue - self.actions[-1][1] #reward + (discount factor)*(largest q value in new state) - (q value chosen)
-        Qold = self.actions[-1][1]
+        TD = reward + gamma*maxActionValue - self.actions[-1][1] #reward + (discount factor)*(largest q value in new state) + (q value chosen)
         Qnew = self.actions[-1][1] + alpha*TD
+
+
+        Qold = self.actions[-1][1]
 
         #this may be deprecated, not sure
         #(new action vector - old action vector) * reward + gamme^timestep
