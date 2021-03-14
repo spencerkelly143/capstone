@@ -9,14 +9,14 @@ class Environment:
     def __init__(self,refPriceConfig):
         #init environment
         print("Create Environment")
-        print(refPriceConfig)        
-        
+        print(refPriceConfig)
+
         self.states = []
-        # tightest bid/ask from last timestep, current ref price, 
+        # tightest bid/ask from last timestep, current ref price,
         self.refPriceConfig = refPriceConfig
         #init ref prices over time (ref price is independent of all agent actions and environment state.)
         self.refPrices = gmbrownian(
-            refPriceConfig["step"], 
+            refPriceConfig["step"],
             refPriceConfig["time"],
             refPriceConfig["drift"],
             refPriceConfig["volatility"],
@@ -36,7 +36,11 @@ class Environment:
     def getCurrentRefPrice(self):
         if (self.t < len(self.refPrices)-1 ):
             return self.refPrices[self.t]
-        return self.refPrices[-1]    
+        return self.refPrices[-1]
+    def getLastRefPrice(self):
+        if (self.t < len(self.refPrices)-1 ):
+            return self.refPrices[self.t-1]
+        return self.refPrices[-1]
     def getDemand(self):
         #format: demand{"buy": [...],"sell": [...]}
         return self.demand
