@@ -49,7 +49,7 @@ todo: write documentation for q learner
 ## Q-Matrix format
 The q matrix is shaped as a 4 dimentional tensor (4,10,10,5). The first 3 indices are the state of the QLearner/market. They are binned based on the ranges shown below to increase computational efficiency. The 4th index represents the action space. 
 
-    inventory(4): {<-150, -150--100,-100--50,-50-0,0-50,50-100,100-150,>150}
+    inventory(4): {<-1000, -1000--800,-100--50,-50-0,0-50,50-100,100-150,>150}
     bid ratio(10): {<-0.2, 
                 -0.2:-0.15, 
                 -0.15:-0.1,
@@ -102,11 +102,7 @@ The q matrix is shaped as a 4 dimentional tensor (4,10,10,5). The first 3 indice
 * make trader demand function more realistic 
 
 ## Tasks (started)
-
-* get Qlearning agent working more consistently
-    * setup simulation to have many training episodes
-    * setup testing for all methods
-    * formalize all math and make sure its good
+* seems like ref price can go below zero
 
 
 ## tasks (done)
@@ -117,4 +113,8 @@ The q matrix is shaped as a 4 dimentional tensor (4,10,10,5). The first 3 indice
 * update Q table with bellman
 * Fix bug with q learner not being able to buy and sell at once
 * get Q-Learning agent working in simple terms
+* get Qlearning agent working more consistently
+    * setup simulation to have many training episodes
+    * setup testing for all methods
+    * formalize all math and make sure its good
 

@@ -17,14 +17,14 @@ refPriceConfig = {
     "step": step,
     "time": time,
     "drift": 0, #Test at 0 to be closer to math model
-    "volatility": 0.1,
+    "volatility": 0.01,
     "initValue": 20
 }
 
 #Qlearner configuration
 qConfig = {
     "mu": 0.8, #exploration coefficient (%80 of time it is greedy) *change this
-    "gamma": 0.99, #discount factor (should be ~1 due to high number of timesteps)
+    "gamma": 0.999, #discount factor (should be ~1 due to high number of timesteps)
     "alpha": 0.2, #learning rate
     "nudge": 0.002, # nudge constant for epsilon_bid and epsilon_ask
     "init_epsilon_bid": 0.1,

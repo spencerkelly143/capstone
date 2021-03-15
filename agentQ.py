@@ -190,11 +190,11 @@ class AgentQ():
         actionIndex, actionValue, maxActionIndex, maxActionValue  = self.pickAction(stateIndex, restrict_bid, restrict_ask)
 
         #move bid/ask based on state and Q
-        nudgeConstant = self.qLearningConfig["nudge"]
+        nudgeConstant = self.qLearningConfig["nudge"] # 0.002
 
-        #update epsilon_bid and epsilon_ask
-
-
+        # update epsilon_bid and epsilon_ask
+        # do action based on selected actionIndex
+        # increase/decrease epsilons or do nothing
         if(actionIndex ==0):
             epsilon_bid = epsilon_bid + nudgeConstant
         elif(actionIndex==1):
@@ -217,12 +217,14 @@ class AgentQ():
             epsilon_ask = epsilon_ask - nudgeConstant
         #if action is 8 ("do nothing") then epsilons are unchanged
 
-        #sanity check
+        #sanity check, ensure non-negative epsilons
         if(epsilon_bid<0): epsilon_bid=0
         if(epsilon_ask<0): epsilon_ask=0
         self.spreadRatios.append([epsilon_bid,epsilon_ask])#add new bid/ask eps ratios to storage
+       
         newBid = price*(1-epsilon_bid)
         newAsk = price*(1+epsilon_ask)
+       
         self.spread.append([newBid,newAsk])
         #return actual bid ask spread
         return self.spread[-1][0], self.spread[-1][1]
@@ -273,19 +275,30 @@ class AgentQ():
         # print(epsilon_ask)
         # print("Action index: ")
         # print(actionIndex)
-        gamma = self.qLearningConfig["gamma"] #discount factor
-        alpha = self.qLearningConfig["alpha"] #learning rate
+        gamma = self.qLearningConfig["gamma"] #discount factor 0.99
+        alpha = self.qLearningConfig["alpha"] #learning rate 0.4
 
         reward = self.profit[-1]-self.profit[-2] #profit made from last step
-        #calc temporal difference
-        TD = reward + gamma*maxActionValue - self.actions[-1][1] #reward + (discount factor)*(largest q value in new state) + (q value chosen)
+
+        # update to include cost of inventory?
+        # reward = (profit from last timestep + change in value of inventory)
+        # should max inventory scale with total profit?
+
+        TD = reward + gamma*maxActionValue - self.actions[-1][1] 
+        #Temporal diff = reward + (discount factor)*(largest q value in new state) - (q value chosen)
+
         Qnew = self.actions[-1][1] + alpha*TD
+        
+        #new q value = old q value + (learning rate) * temporal diff
 
-
-        Qold = self.actions[-1][1]
+        # more intuitive form:
+        # Qnew = (1- alpha)*Qold + alpha*R
+        # think of a point on the line connecting Qold, Qnew  
+        # if |qnew-qold| is small
 
         #this may be deprecated, not sure
         #(new action vector - old action vector) * reward + gamme^timestep
+        Qold = self.actions[-1][1]
         learned = (Qnew-Qold)*reward*(min(gamma*2,1))**len(self.learningCurve)/40
 
         self.learningCurve.append(learned + self.learningCurve[-1])
