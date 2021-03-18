@@ -30,7 +30,7 @@ qConfig = {
     "init_epsilon_bid": 0.1,
     "init_epsilon_ask": 0.1,
     "max_inventory": 1000,
-    "min_inventory": 1000,
+    "min_inventory": -1000,
 }
 
 #create environment
@@ -62,39 +62,50 @@ while(not done):
     lastPrice = env.getLastRefPrice()
     buyOrder = env.getDemand()["buy"][currentTimeStep]
     sellOrder = env.getDemand()["sell"][currentTimeStep]
+    minInv =  qConfig["min_inventory"]
+    maxInv =  qConfig["max_inventory"]
 
-    #spreads for competitors and Qlearner
-    bid = np.zeros(numCompetitors+1)
-    ask = np.zeros(numCompetitors+1)
-
-    #get bids/asks from market maker competitors
+    #determine buy and sell winners
+    #default to impossibly bad bid ask spread with winner being a non-agent (id 10)
+    bids = [[-1,10]]
+    asks = [[99999,10]]
     for i in range(numCompetitors):
-        bid[i], ask[i] = agents[i].quote(price, buyOrder, sellOrder)
-
+        # check if it can make the buy
+        # if yes, then add to bids array with [[bidprice, agentid]] 
+        # check if it can make the sell 
+        # if yes, then add to asks array with [[askprice, agentid]] 
+        bid, ask = agents[i].quote(price, buyOrder, sellOrder)
+        if(agents[i].inventory[-1] + buyOrder <= maxInv):
+            bids.append([bid,i])
+        if(agents[i].inventory[-1] - sellOrder >= minInv):
+            asks.append([ask,i])
+        
     #get bid/ask from qlearner (with bid/ask from last timestep)
     competitorSpread = {
         "bid":env.states[-1]["tightestSpread"]["bid"],
         "ask":env.states[-1]["tightestSpread"]["ask"],
     }
-    bid[-1], ask[-1] = Qagent.quote(price,competitorSpread)# add qagent bid and ask to end of bid and ask arrays
-    #profit calc for learner
-    sellWinner = ask.argmin()
-    buyWinner = bid.argmax()
-    #cap inventory at max, agent cannot buy if it will max out
-    if(Qagent.inventory[-1] + buyOrder > qConfig["max_inventory"]):
-        buyWinner = bid[:-1].argmax()
-    #cap inventory at min, agent cannot buy if it will drop below
-    if(Qagent.inventory[-1] - sellOrder < -qConfig["min_inventory"]):
-        sellWinner = ask[:-1].argmin()
+    qbid, qask = Qagent.quote(price,competitorSpread)
+    if(Qagent.inventory[-1] + buyOrder <= maxInv):
+        bids.append([qbid,numCompetitors])
+    if(Qagent.inventory[-1] - sellOrder >= minInv):
+        asks.append([qask,numCompetitors])
 
+    #sort bids/asks to be ascending by first col (value)
+    bids.sort(key = lambda x: x[0])
+    asks.sort(key = lambda x: x[0])
+
+    #pick buy/sell winner
+    bestBid, buyWinner = bids[-1]
+    bestAsk, sellWinner = asks[0]
     #profit calculations for each agent
     for i in range(numCompetitors):
-            agents[i].settle(sellOrder, bid[buyWinner], buyWinner, buyOrder, ask[sellWinner], sellWinner)
-    Qagent.settle(sellOrder, bid[buyWinner], buyWinner, buyOrder, ask[sellWinner], sellWinner, price, lastPrice)
+            agents[i].settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner)
+    Qagent.settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner, price, lastPrice)
 
     #prevent QL agent from being a part of tightest spread
     env.updateState({
-        "tightestSpread": {"bid": max(bid[:-1]), "ask": min(ask[:-1])},
+        "tightestSpread": {"bid": bestBid, "ask": bestAsk},
         "refPrice": price
         })
 
@@ -167,12 +178,12 @@ def plotResults():
     # plt.title('QL Agent Learning Curve')
     # plt.grid(True)
 
-    #plot Qlearner inventory
-    plt.figure(numCompetitors+3)
-    plt.plot(Qagent.inventory)
+    #plot agent inventories
+    plt.figure(numCompetitors+2)
+    plt.plot(agents[0].inventory)
     plt.ylabel('inventory')
     plt.xlabel('Timestep')
-    plt.title('QL Agent inventory')
+    plt.title('Agent inventory')
     plt.grid(True)
 
 
