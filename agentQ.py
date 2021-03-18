@@ -167,8 +167,8 @@ class AgentQ():
         oldAsk = self.spread[-1][1]
 
         #observable state for bid and ask ratios
-        bidRatio = (competitorSpread["bid"]-oldBid)/price
-        askRatio = (oldAsk-competitorSpread["ask"])/price
+        bidRatio = (float(competitorSpread["bid"])-oldBid)/price
+        askRatio = (oldAsk-float(competitorSpread["ask"]))/price
 
         inventory = self.inventory[-1]
         stateIndex = self.selectStateIndex(inventory,bidRatio,askRatio)
@@ -277,6 +277,8 @@ class AgentQ():
         # print(actionIndex)
         gamma = self.qLearningConfig["gamma"] #discount factor 0.99
         alpha = self.qLearningConfig["alpha"] #learning rate 0.4
+
+      
 
         reward = self.profit[-1]-self.profit[-2] #profit made from last step
 
