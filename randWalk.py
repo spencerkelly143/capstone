@@ -7,7 +7,12 @@ def randWalk(N, drift, volatility, initValue):
     price = np.cumsum(Z) + initValue
     print("Ref Price array:")
     print(price)
-    t = np.linspace(0,N,N)
-    plt.plot(t,price)
-    plt.show()
+    
+    #prevent price from going below negative.
+    price = [0 if val < 0 else val for val in price]
+     
+    # t = np.linspace(0,N,N)
+    # plt.plot(t,price)
+    # plt.show()
+
     return price
