@@ -157,7 +157,7 @@ class AgentQ():
         return actionIndex, actionValue, maxActionIndex, maxActionValue
 
 
-    def quote(self, price, competitorSpread):
+    def quote(self, price, competitorSpread,emax):
         #initial spread
         if(not self.spread):
             self.spread.append([price*(1-self.qLearningConfig["init_epsilon_bid"]), price*(1+self.qLearningConfig["init_epsilon_ask"])])
@@ -177,11 +177,11 @@ class AgentQ():
         epsilon_bid = self.spreadRatios[-1][0]
         epsilon_ask = self.spreadRatios[-1][1]
 
-        if(epsilon_bid>=1):
+        if(epsilon_bid>=emax):
             restrict_bid = True
         else:
             restrict_bid = False
-        if(epsilon_ask>=1):
+        if(epsilon_ask>=emax):
             restrict_ask = True
         else:
             restrict_ask = False
@@ -230,22 +230,22 @@ class AgentQ():
         return self.spread[-1][0], self.spread[-1][1]
         #update new state in settle()
 
-    def settle(self,sellOrder, bid, buyWinner, buyOrder, ask, sellWinner,price, lastPrice):
+    def settle(self,sellOrder, bid, buyWinner, buyOrder, ask, sellWinner,price, lastPrice,emax):
         if self._id == buyWinner and self._id == sellWinner: #QL agent hold tightest bid/ask spread
             self.inventory.append(self.inventory[-1] + buyOrder - sellOrder)
-            self.profit.append(self.profit[-1] - buyOrder*bid + sellOrder*ask)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + buyOrder*(price - bid) + sellOrder*(ask-price))
             self.trades.append(buyOrder - sellOrder)#record trade
         elif self._id == buyWinner:
             self.inventory.append(self.inventory[-1] + buyOrder)
-            self.profit.append(self.profit[-1] - buyOrder*bid)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + buyOrder*(price - bid))
             self.trades.append(buyOrder)#record trade
         elif self._id == sellWinner:
             self.inventory.append(self.inventory[-1] - sellOrder)
-            self.profit.append(self.profit[-1] + sellOrder*ask)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + sellOrder*(ask-price))
             self.trades.append(-1*sellOrder ) #record trade (negative means a sell)
         if(self._id != sellWinner and self._id != buyWinner):
             self.inventory.append(self.inventory[-1])
-            self.profit.append(self.profit[-1])
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice))
             self.trades.append(0) #record trade
 
         #Find new (post trade) state
@@ -254,11 +254,11 @@ class AgentQ():
         epsilon_bid = self.spreadRatios[-1][0]
         epsilon_ask = self.spreadRatios[-1][1]
 
-        if(epsilon_bid>=1):
+        if(epsilon_bid>=emax):
             restrict_bid = True
         else:
             restrict_bid = False
-        if(epsilon_ask>=1):
+        if(epsilon_ask>emax):
             restrict_ask = True
         else:
             restrict_ask = False

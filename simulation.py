@@ -8,8 +8,8 @@ from agentQ import AgentQ
 import matplotlib.pyplot as plt
 
 #simulation configuration
-step = 0.25
-time = 10000
+step = 1
+time = 100000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful
@@ -85,7 +85,7 @@ while(not done):
         "bid":env.states[-1]["tightestSpread"]["bid"],
         "ask":env.states[-1]["tightestSpread"]["ask"],
     }
-    qbid, qask = Qagent.quote(price,competitorSpread)
+    qbid, qask = Qagent.quote(price,competitorSpread,emax)
     if(Qagent.inventory[-1] + buyOrder <= maxInv):
         bids.append([qbid,numCompetitors])
     if(Qagent.inventory[-1] - sellOrder >= minInv):
@@ -101,7 +101,7 @@ while(not done):
     #profit calculations for each agent
     for i in range(numCompetitors):
             agents[i].settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner)
-    Qagent.settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner, price, lastPrice)
+    Qagent.settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner, price, lastPrice,emax)
 
     #prevent QL agent from being a part of tightest spread
     env.updateState({
@@ -153,18 +153,22 @@ def plotResults():
     #     plt.title('Agent '+ str(agents[i]._id) + ' trade activity')
     #     plt.grid(True)
 
+   
     plt.figure(2)
-    plt.plot([i[0] for i in Qagent.spreadRatios])
-    plt.ylabel('epsilon')
-    plt.xlabel('Timestep')
+    plt.hist([i[0] for i in Qagent.spreadRatios], density = True, bins = 30)
+    plt.ylabel('Probability')
+    plt.xlabel('Bid Epsilon')
     plt.title('QL Bid Epsilon')
     plt.grid(True)
+    
+
     plt.figure(3)
-    plt.plot([i[1] for i in Qagent.spreadRatios])
-    plt.ylabel('epsilon')
-    plt.xlabel('Timestep')
+    plt.hist([i[1] for i in Qagent.spreadRatios], density = True, bins = 30)
+    plt.ylabel('Probability')
+    plt.xlabel('Ask Epsilon')
     plt.title('QL ask Epsilon')
     plt.grid(True)
+    
     #plot Qlearner
     plt.figure(numCompetitors+1)
     plt.plot(Qagent.rewards)
@@ -183,7 +187,7 @@ def plotResults():
 
     #plot agent inventories
     plt.figure(numCompetitors+2)
-    plt.plot(agents[0].inventory)
+    plt.plot(Qagent.inventory)
     plt.ylabel('inventory')
     plt.xlabel('Timestep')
     plt.title('Agent inventory')
@@ -195,3 +199,8 @@ def plotResults():
 
 
 plotResults()
+profitTotal = 0
+for i in range(0,int(steps)):
+    profitTotal = profitTotal + Qagent.profit[i]*qConfig["gamma"]**i
+     
+print("Total Discounted Profit: ", profitTotal)
