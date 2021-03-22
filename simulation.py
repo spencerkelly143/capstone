@@ -8,8 +8,8 @@ from agentQ import AgentQ
 import matplotlib.pyplot as plt
 
 #simulation configuration
-step = 0.25
-time = 10000
+step = 1
+time = 100000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful
@@ -85,7 +85,7 @@ while(not done):
         "bid":env.states[-1]["tightestSpread"]["bid"],
         "ask":env.states[-1]["tightestSpread"]["ask"],
     }
-    qbid, qask = Qagent.quote(price,competitorSpread)
+    qbid, qask = Qagent.quote(price,competitorSpread,emax)
     if(Qagent.inventory[-1] + buyOrder <= maxInv):
         bids.append([qbid,numCompetitors])
     if(Qagent.inventory[-1] - sellOrder >= minInv):
@@ -101,7 +101,7 @@ while(not done):
     #profit calculations for each agent
     for i in range(numCompetitors):
             agents[i].settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner)
-    Qagent.settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner, price, lastPrice)
+    Qagent.settle(sellOrder, bestBid, buyWinner, buyOrder, bestAsk, sellWinner, price, lastPrice,emax)
 
     #prevent QL agent from being a part of tightest spread
     env.updateState({
