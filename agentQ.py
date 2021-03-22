@@ -221,10 +221,10 @@ class AgentQ():
         if(epsilon_bid<0): epsilon_bid=0
         if(epsilon_ask<0): epsilon_ask=0
         self.spreadRatios.append([epsilon_bid,epsilon_ask])#add new bid/ask eps ratios to storage
-       
+
         newBid = price*(1-epsilon_bid)
         newAsk = price*(1+epsilon_ask)
-       
+
         self.spread.append([newBid,newAsk])
         #return actual bid ask spread
         return self.spread[-1][0], self.spread[-1][1]
@@ -278,24 +278,25 @@ class AgentQ():
         gamma = self.qLearningConfig["gamma"] #discount factor 0.99
         alpha = self.qLearningConfig["alpha"] #learning rate 0.4
 
-      
+
 
         reward = self.profit[-1]-self.profit[-2] #profit made from last step
 
+        self.rewards.append(reward)
         # update to include cost of inventory?
         # reward = (profit from last timestep + change in value of inventory)
         # should max inventory scale with total profit?
 
-        TD = reward + gamma*maxActionValue - self.actions[-1][1] 
+        TD = reward + gamma*maxActionValue - self.actions[-1][1]
         #Temporal diff = reward + (discount factor)*(largest q value in new state) - (q value chosen)
 
         Qnew = self.actions[-1][1] + alpha*TD
-        
+
         #new q value = old q value + (learning rate) * temporal diff
 
         # more intuitive form:
         # Qnew = (1- alpha)*Qold + alpha*R
-        # think of a point on the line connecting Qold, Qnew  
+        # think of a point on the line connecting Qold, Qnew
         # if |qnew-qold| is small
 
         #this may be deprecated, not sure

@@ -1,6 +1,6 @@
 import numpy as np
 import time as TIME
-
+import h5py
 from Environment import Environment
 from agent import Agent
 from agent2 import Agent2
@@ -71,15 +71,15 @@ while(not done):
     asks = [[99999,10]]
     for i in range(numCompetitors):
         # check if it can make the buy
-        # if yes, then add to bids array with [[bidprice, agentid]] 
-        # check if it can make the sell 
-        # if yes, then add to asks array with [[askprice, agentid]] 
+        # if yes, then add to bids array with [[bidprice, agentid]]
+        # check if it can make the sell
+        # if yes, then add to asks array with [[askprice, agentid]]
         bid, ask = agents[i].quote(price, buyOrder, sellOrder)
         if(agents[i].inventory[-1] + buyOrder <= maxInv):
             bids.append([bid,i])
         if(agents[i].inventory[-1] - sellOrder >= minInv):
             asks.append([ask,i])
-        
+
     #get bid/ask from qlearner (with bid/ask from last timestep)
     competitorSpread = {
         "bid":env.states[-1]["tightestSpread"]["bid"],
@@ -114,6 +114,9 @@ while(not done):
     #finish once simulation time is reached
     if(currentTimeStep > steps -1):
         done = True
+        h5f = h5py.File('data.h5', 'w')
+        h5f.create_dataset('dataset_1', data=Qagent.qTable)
+        h5f.close()
         print("Simulation Complete")
         print("Total Timesteps: " + str(steps))
         print("Execution Time: - %s seconds -" % (TIME.time() - start_time))
