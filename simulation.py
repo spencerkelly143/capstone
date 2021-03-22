@@ -150,18 +150,22 @@ def plotResults():
     #     plt.title('Agent '+ str(agents[i]._id) + ' trade activity')
     #     plt.grid(True)
 
+   
     plt.figure(2)
-    plt.plot([i[0] for i in Qagent.spreadRatios])
-    plt.ylabel('epsilon')
-    plt.xlabel('Timestep')
+    plt.hist([i[0] for i in Qagent.spreadRatios], density = True, bins = 30)
+    plt.ylabel('Probability')
+    plt.xlabel('Bid Epsilon')
     plt.title('QL Bid Epsilon')
     plt.grid(True)
+    
+
     plt.figure(3)
-    plt.plot([i[1] for i in Qagent.spreadRatios])
-    plt.ylabel('epsilon')
-    plt.xlabel('Timestep')
+    plt.hist([i[1] for i in Qagent.spreadRatios], density = True, bins = 30)
+    plt.ylabel('Probability')
+    plt.xlabel('Ask Epsilon')
     plt.title('QL ask Epsilon')
     plt.grid(True)
+    
     #plot Qlearner
     plt.figure(numCompetitors+1)
     plt.plot(Qagent.rewards)
@@ -180,7 +184,7 @@ def plotResults():
 
     #plot agent inventories
     plt.figure(numCompetitors+2)
-    plt.plot(agents[0].inventory)
+    plt.plot(Qagent.inventory)
     plt.ylabel('inventory')
     plt.xlabel('Timestep')
     plt.title('Agent inventory')
@@ -192,3 +196,8 @@ def plotResults():
 
 
 plotResults()
+profitTotal = 0
+for i in range(0,int(steps)):
+    profitTotal = profitTotal + Qagent.profit[i]*qConfig["gamma"]**i
+     
+print("Total Discounted Profit: ", profitTotal)

@@ -233,19 +233,19 @@ class AgentQ():
     def settle(self,sellOrder, bid, buyWinner, buyOrder, ask, sellWinner,price, lastPrice):
         if self._id == buyWinner and self._id == sellWinner: #QL agent hold tightest bid/ask spread
             self.inventory.append(self.inventory[-1] + buyOrder - sellOrder)
-            self.profit.append(self.profit[-1] - buyOrder*bid + sellOrder*ask)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + buyOrder*(price - bid) + sellOrder*(ask-price))
             self.trades.append(buyOrder - sellOrder)#record trade
         elif self._id == buyWinner:
             self.inventory.append(self.inventory[-1] + buyOrder)
-            self.profit.append(self.profit[-1] - buyOrder*bid)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + buyOrder*(price - bid))
             self.trades.append(buyOrder)#record trade
         elif self._id == sellWinner:
             self.inventory.append(self.inventory[-1] - sellOrder)
-            self.profit.append(self.profit[-1] + sellOrder*ask)
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice) + sellOrder*(ask-price))
             self.trades.append(-1*sellOrder ) #record trade (negative means a sell)
         if(self._id != sellWinner and self._id != buyWinner):
             self.inventory.append(self.inventory[-1])
-            self.profit.append(self.profit[-1])
+            self.profit.append(self.profit[-1] + self.inventory[-2]*(price - lastPrice))
             self.trades.append(0) #record trade
 
         #Find new (post trade) state
