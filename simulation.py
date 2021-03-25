@@ -184,16 +184,16 @@ def plotResults():
     plt.title('QL rewards activity')
     plt.grid(True)
 
-    #plot Qlearner learning curve
-    # plt.figure(numCompetitors+2)
-    # plt.plot(Qagent.learningCurve)
-    # plt.ylabel('Learned amount')
-    # plt.xlabel('Timestep')
-    # plt.title('QL Agent Learning Curve')
-    # plt.grid(True)
+    # plot Qlearner learning curve
+    plt.figure(numCompetitors+2)
+    plt.plot(Qagent.learningCurve)
+    plt.ylabel('Qnew - Qold')
+    plt.xlabel('Timestep')
+    plt.title('QL Agent Convergence')
+    plt.grid(True)
 
     #plot agent inventories
-    plt.figure(numCompetitors+2)
+    plt.figure(numCompetitors+3)
     plt.plot(Qagent.inventory)
     plt.ylabel('inventory')
     plt.xlabel('Timestep')

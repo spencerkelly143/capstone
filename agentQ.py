@@ -299,12 +299,11 @@ class AgentQ():
         # think of a point on the line connecting Qold, Qnew
         # if |qnew-qold| is small
 
+
         #this may be deprecated, not sure
         #(new action vector - old action vector) * reward + gamme^timestep
         Qold = self.actions[-1][1]
-        learned = (Qnew-Qold)*reward*(min(gamma*2,1))**len(self.learningCurve)/40
-
-        self.learningCurve.append(learned + self.learningCurve[-1])
+        self.learningCurve.append(Qnew-Qold)
 
         updateIndex = self.states[-1]
         updateIndex.append(self.actions[-1][0])
