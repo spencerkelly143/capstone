@@ -5,11 +5,12 @@ from Environment import Environment
 from agent import Agent
 from agent2 import Agent2
 from agentQ import AgentQ
+from agentGreedy import AgentGreedy
 import matplotlib.pyplot as plt
 
 #simulation configuration
 step = 1
-time = 100000
+time = 1000000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful
@@ -33,6 +34,7 @@ qConfig = {
     "min_inventory": -1000,
 }
 
+mode = 'test'   #test or train
 #create environment
 env = Environment(refPriceConfig)
 
@@ -47,7 +49,10 @@ env.updateState({
 qTable = np.random.rand(7200) #array of random floats between 0-1
 qTable = np.reshape(qTable, (8,10,10,9))
 #create Q learning agent
-Qagent = AgentQ(qConfig,qTable,numCompetitors)
+if mode == 'test':
+    Qagent = AgentGreedy(qConfig,qTable,numCompetitors)
+else:
+    Qagent = AgentQ(qConfig,qTable,numCompetitors)
 #create competitor agents
 agents = [Agent(emax) for i in range(numCompetitors)]
 
@@ -114,9 +119,11 @@ while(not done):
     #finish once simulation time is reached
     if(currentTimeStep > steps -1):
         done = True
-        h5f = h5py.File('data.h5', 'w')
-        h5f.create_dataset('dataset_1', data=Qagent.qTable)
-        h5f.close()
+        if mode != 'test':
+            print("Saving Q Table")
+            h5f = h5py.File('data.h5', 'w')
+            h5f.create_dataset('dataset_1', data=Qagent.qTable)
+            h5f.close()
         print("Simulation Complete")
         print("Total Timesteps: " + str(steps))
         print("Execution Time: - %s seconds -" % (TIME.time() - start_time))
@@ -153,14 +160,14 @@ def plotResults():
     #     plt.title('Agent '+ str(agents[i]._id) + ' trade activity')
     #     plt.grid(True)
 
-   
+
     plt.figure(2)
     plt.hist([i[0] for i in Qagent.spreadRatios], density = True, bins = 30)
     plt.ylabel('Probability')
     plt.xlabel('Bid Epsilon')
     plt.title('QL Bid Epsilon')
     plt.grid(True)
-    
+
 
     plt.figure(3)
     plt.hist([i[1] for i in Qagent.spreadRatios], density = True, bins = 30)
@@ -168,7 +175,7 @@ def plotResults():
     plt.xlabel('Ask Epsilon')
     plt.title('QL ask Epsilon')
     plt.grid(True)
-    
+
     #plot Qlearner
     plt.figure(numCompetitors+1)
     plt.plot(Qagent.rewards)
@@ -202,5 +209,5 @@ plotResults()
 profitTotal = 0
 for i in range(0,int(steps)):
     profitTotal = profitTotal + Qagent.profit[i]*qConfig["gamma"]**i
-     
+
 print("Total Discounted Profit: ", profitTotal)
