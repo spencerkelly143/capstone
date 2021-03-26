@@ -26,15 +26,15 @@ refPriceConfig = {
 qConfig = {
     "mu": 0.8, #exploration coefficient (%80 of time it is greedy) *change this
     "gamma": 0.999, #discount factor (should be ~1 due to high number of timesteps)
-    "alpha": 0.2, #learning rate
-    "nudge": 0.002, # nudge constant for epsilon_bid and epsilon_ask
+    "alpha": 0.4, #learning rate
+    "nudge": 0.01, # nudge constant for epsilon_bid and epsilon_ask
     "init_epsilon_bid": 0.1,
     "init_epsilon_ask": 0.1,
     "max_inventory": 1000,
     "min_inventory": -1000,
 }
 
-mode = 'test'   #test or train
+mode = 'train'   #test or train
 #create environment
 env = Environment(refPriceConfig)
 
@@ -63,6 +63,9 @@ done = False
 while(not done):
     #get current state variables
     currentTimeStep = env.getCurrentTimeStep()
+    if(currentTimeStep%1000==0):
+        print(currentTimeStep)
+
     price = env.getCurrentRefPrice()
     lastPrice = env.getLastRefPrice()
     buyOrder = env.getDemand()["buy"][currentTimeStep]
