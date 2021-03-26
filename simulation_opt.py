@@ -1,16 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 25 13:47:09 2021
+
+@author: Willem Atack
+"""
+
+
 import numpy as np
 import time as TIME
-import h5py
+
 from Environment import Environment
 from agent import Agent
 from agent2 import Agent2
 from agentQ import AgentQ
-from agentGreedy import AgentGreedy
+from agent_opt import Agent_opt
 import matplotlib.pyplot as plt
 
 #simulation configuration
 step = 1
-time = 10000000
+time = 100000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful
@@ -26,15 +34,14 @@ refPriceConfig = {
 qConfig = {
     "mu": 0.8, #exploration coefficient (%80 of time it is greedy) *change this
     "gamma": 0.999, #discount factor (should be ~1 due to high number of timesteps)
-    "alpha": 0.4, #learning rate
-    "nudge": 0.01, # nudge constant for epsilon_bid and epsilon_ask
+    "alpha": 0.2, #learning rate
+    "nudge": 0.002, # nudge constant for epsilon_bid and epsilon_ask
     "init_epsilon_bid": 0.1,
     "init_epsilon_ask": 0.1,
     "max_inventory": 1000,
     "min_inventory": -1000,
 }
 
-mode = 'train'   #test or train
 #create environment
 env = Environment(refPriceConfig)
 
@@ -49,10 +56,7 @@ env.updateState({
 qTable = np.random.rand(7200) #array of random floats between 0-1
 qTable = np.reshape(qTable, (8,10,10,9))
 #create Q learning agent
-if mode == 'test':
-    Qagent = AgentGreedy(qConfig,qTable,numCompetitors)
-else:
-    Qagent = AgentQ(qConfig,qTable,numCompetitors)
+Qagent = Agent_opt(qConfig,qTable,numCompetitors)
 #create competitor agents
 agents = [Agent(emax) for i in range(numCompetitors)]
 
@@ -63,9 +67,6 @@ done = False
 while(not done):
     #get current state variables
     currentTimeStep = env.getCurrentTimeStep()
-    if(currentTimeStep%1000==0):
-        print(currentTimeStep)
-
     price = env.getCurrentRefPrice()
     lastPrice = env.getLastRefPrice()
     buyOrder = env.getDemand()["buy"][currentTimeStep]
@@ -79,21 +80,21 @@ while(not done):
     asks = [[99999,10]]
     for i in range(numCompetitors):
         # check if it can make the buy
-        # if yes, then add to bids array with [[bidprice, agentid]]
-        # check if it can make the sell
-        # if yes, then add to asks array with [[askprice, agentid]]
+        # if yes, then add to bids array with [[bidprice, agentid]] 
+        # check if it can make the sell 
+        # if yes, then add to asks array with [[askprice, agentid]] 
         bid, ask = agents[i].quote(price, buyOrder, sellOrder)
         if(agents[i].inventory[-1] + buyOrder <= maxInv):
             bids.append([bid,i])
         if(agents[i].inventory[-1] - sellOrder >= minInv):
             asks.append([ask,i])
-
+        
     #get bid/ask from qlearner (with bid/ask from last timestep)
     competitorSpread = {
         "bid":env.states[-1]["tightestSpread"]["bid"],
         "ask":env.states[-1]["tightestSpread"]["ask"],
     }
-    qbid, qask = Qagent.quote(price,competitorSpread,emax)
+    qbid, qask = Qagent.quote(price)
     if(Qagent.inventory[-1] + buyOrder <= maxInv):
         bids.append([qbid,numCompetitors])
     if(Qagent.inventory[-1] - sellOrder >= minInv):
@@ -122,11 +123,6 @@ while(not done):
     #finish once simulation time is reached
     if(currentTimeStep > steps -1):
         done = True
-        if mode != 'test':
-            print("Saving Q Table")
-            h5f = h5py.File('data.h5', 'w')
-            h5f.create_dataset('dataset_1', data=Qagent.qTable)
-            h5f.close()
         print("Simulation Complete")
         print("Total Timesteps: " + str(steps))
         print("Execution Time: - %s seconds -" % (TIME.time() - start_time))
@@ -163,14 +159,14 @@ def plotResults():
     #     plt.title('Agent '+ str(agents[i]._id) + ' trade activity')
     #     plt.grid(True)
 
-
+   
     plt.figure(2)
     plt.hist([i[0] for i in Qagent.spreadRatios], density = True, bins = 30)
     plt.ylabel('Probability')
     plt.xlabel('Bid Epsilon')
     plt.title('QL Bid Epsilon')
     plt.grid(True)
-
+    
 
     plt.figure(3)
     plt.hist([i[1] for i in Qagent.spreadRatios], density = True, bins = 30)
@@ -178,25 +174,25 @@ def plotResults():
     plt.xlabel('Ask Epsilon')
     plt.title('QL ask Epsilon')
     plt.grid(True)
-
+    
     #plot Qlearner
-    plt.figure(numCompetitors+1)
+    #plt.figure(numCompetitors+1)
     plt.plot(Qagent.rewards)
     plt.ylabel('Volume')
     plt.xlabel('Timestep')
     plt.title('QL rewards activity')
     plt.grid(True)
 
-    # plot Qlearner learning curve
-    plt.figure(numCompetitors+2)
-    plt.plot(Qagent.learningCurve)
-    plt.ylabel('Qnew - Qold')
-    plt.xlabel('Timestep')
-    plt.title('QL Agent Convergence')
-    plt.grid(True)
+    #plot Qlearner learning curve
+    # plt.figure(numCompetitors+2)
+    # plt.plot(Qagent.learningCurve)
+    # plt.ylabel('Learned amount')
+    # plt.xlabel('Timestep')
+    # plt.title('QL Agent Learning Curve')
+    # plt.grid(True)
 
     #plot agent inventories
-    plt.figure(numCompetitors+3)
+    plt.figure(numCompetitors+2)
     plt.plot(Qagent.inventory)
     plt.ylabel('inventory')
     plt.xlabel('Timestep')
