@@ -11,13 +11,12 @@ def traderDemand(Size):
                 This is a rough way fo doing this that causes the values to no
                 longer be normally distributed, so this may be adjusted.
     """
-    buyfl = npr.randn(int(Size+1))*100        #generates normally distributed array
+    buyfl = npr.randn(int(Size+1))*40        #generates normally distributed array
     buy = np.array([int(abs(x)%101) for x in buyfl])
-    sellfl = npr.randn(int(Size+1))*100
-    sell = np.array([int(abs(x)%100) for x in sellfl])
+    sellfl = npr.randn(int(Size+1))*40
+    sell = np.array([int(abs(x)%101) for x in sellfl])
     demand = {
         "buy": buy,
         "sell": sell,
-        
     }
     return demand
