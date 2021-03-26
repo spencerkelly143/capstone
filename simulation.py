@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #simulation configuration
 step = 1
-time = 1000000
+time = 10000000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful

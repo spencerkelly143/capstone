@@ -34,17 +34,17 @@ class AgentQ():
         #inventory
         if(inventory <= -900):
             inventoryIndex =0
-        elif(inventory >-900 and inventory <=-100):
+        elif(inventory >-900 and inventory <=-500):
             inventoryIndex=1
-        elif(inventory >-100 and inventory <=-50):
+        elif(inventory >-500 and inventory <=-250):
             inventoryIndex=2
-        elif(inventory >-50 and inventory <=0):
+        elif(inventory >-250 and inventory <=0):
             inventoryIndex=3
-        elif(inventory >0 and inventory <= 50 ):
+        elif(inventory >0 and inventory <= 250 ):
             inventoryIndex =4
-        elif(inventory >50 and inventory <=100):
+        elif(inventory >250 and inventory <=500):
             inventoryIndex=5
-        elif(inventory >100 and inventory <900):
+        elif(inventory >500 and inventory <900):
             inventoryIndex=6
         else:
             inventoryIndex=7 #inventory>150
@@ -118,28 +118,30 @@ class AgentQ():
         bidOp = [1,2,3,6,7,8]
         if(restrict_ask and restrict_bid):
             newOptions = qOptions[bothOp]
-            actionIndex = newOptions.argmax() #chosen action
-
+            #actionIndex = newOptions.argmax() #chosen action
+            actionIndex = self.maxArg(newOptions)
             if(actionIndex==0): actionIndex = actionIndex+1
             elif(actionIndex==1): actionIndex = actionIndex+2
             elif(actionIndex==2): actionIndex = actionIndex+5
             elif(actionIndex==3): actionIndex = actionIndex+5
         elif(restrict_ask):
             newOptions = qOptions[askOp]
-            actionIndex = newOptions.argmax() #chosen action
+            #actionIndex = newOptions.argmax() #chosen action
+            actionIndex = self.maxArg(newOptions)
             if(actionIndex==2): actionIndex = actionIndex+1
             elif(actionIndex==3):actionIndex = actionIndex+2
             elif(actionIndex==4): actionIndex = actionIndex+3
             elif(actionIndex==5): actionIndex = actionIndex+3
         elif(restrict_bid):
             newOptions = qOptions[bidOp]
-            actionIndex = newOptions.argmax() + 1#chosen action
-
+            #actionIndex = newOptions.argmax() + 1#chosen action
+            actionIndex = self.maxArg(newOptions)+1
             if(actionIndex==4): actionIndex = actionIndex+2
             elif(actionIndex==5): actionIndex = actionIndex+2
             elif(actionIndex==6): actionIndex = actionIndex+2
         else:
-            actionIndex = qOptions.argmax() #chosen action
+            #actionIndex = qOptions.argmax() #chosen action
+            actionIndex = self.maxArg(qOptions)
         maxActionIndex = actionIndex
         #explore or exploit
         if(self.qLearningConfig["mu"] < random.random()):
@@ -313,3 +315,8 @@ class AgentQ():
     def updateQTensor(self,index,newValue):
         self.qTable[index[0]][index[1]][index[2]][index[3]] = newValue
         newActions = self.qTable[index[0]][index[1]][index[2]]
+
+    def maxArg(self, arr):
+        maxIndex = arr.argmax()
+        ins = [i for i in range(len(arr)) if abs(arr[maxIndex] - arr[i]) <= abs(arr[maxIndex]*0.1)]
+        return random.choice(ins)
