@@ -47,46 +47,46 @@ class AgentQ():
         elif(inventory >500 and inventory <900):
             inventoryIndex=6
         else:
-            inventoryIndex=7 #inventory>150
+            inventoryIndex=7 #inventory>900
         #bid ratio
-        if(bidRatio <= -0.2):
+        if(bidRatio <= -0.08):
             bidIndex =0
-        elif(bidRatio >-0.2 and bidRatio <=-0.15):
+        elif(bidRatio >-0.08 and bidRatio <=-0.06):
             bidIndex=1
-        elif(bidRatio >-0.15 and bidRatio <=-0.1):
+        elif(bidRatio >-0.06 and bidRatio <=-0.4):
             bidIndex=2
-        elif(bidRatio >-0.1 and bidRatio <=-0.05):
+        elif(bidRatio >-0.04 and bidRatio <=-0.02):
             bidIndex=3
-        elif(bidRatio >-0.05 and bidRatio <=0):
+        elif(bidRatio >-0.02 and bidRatio <=0):
             bidIndex=4
-        elif(bidRatio >0 and bidRatio <=0.05):
+        elif(bidRatio >0 and bidRatio <=0.02):
             bidIndex=5
-        elif(bidRatio >0.05 and bidRatio <=0.1):
+        elif(bidRatio >0.02 and bidRatio <=0.04):
             bidIndex=6
-        elif(bidRatio >0.1 and bidRatio <=0.15):
+        elif(bidRatio >0.04 and bidRatio <=0.06):
             bidIndex=7
-        elif(bidRatio >0.15 and bidRatio <=0.2):
+        elif(bidRatio >0.06 and bidRatio <=0.08):
             bidIndex=8
         else:
             bidIndex=9
         #ask ratio
-        if(askRatio <= -0.2):
+        if(askRatio <= -0.08):
             askIndex =0
-        elif(askRatio >-0.2 and askRatio <=-0.15):
+        elif(askRatio >-0.08 and askRatio <=-0.06):
             askIndex=1
-        elif(askRatio >-0.15 and askRatio <=-0.1):
+        elif(askRatio >-0.06 and askRatio <=-0.04):
             askIndex=2
-        elif(askRatio >-0.1 and askRatio <=-0.05):
+        elif(askRatio >-0.04 and askRatio <=-0.02):
             askIndex=3
-        elif(askRatio >-0.05 and askRatio <=0):
+        elif(askRatio >-0.02 and askRatio <=0):
             askIndex=4
-        elif(askRatio >0 and askRatio <=0.05):
+        elif(askRatio >0 and askRatio <=0.02):
             askIndex=5
-        elif(askRatio >0.05 and askRatio <=0.1):
+        elif(askRatio >0.02 and askRatio <=0.04):
             askIndex=6
-        elif(askRatio >0.1 and askRatio <=0.15):
+        elif(askRatio >0.04 and askRatio <=0.06):
             askIndex=7
-        elif(askRatio >0.15 and askRatio <=0.2):
+        elif(askRatio >0.06 and askRatio <=0.08):
             askIndex=8
         else:
             askIndex=9
