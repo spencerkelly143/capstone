@@ -5,6 +5,7 @@ import random
 
 #Competitor 2: Persistent market maker selects a fixed εb and εa for all time steps.​
 #In practice, it's code logic is very similar to type 1 competitors
+# its hardcoded epsilon_bid = 0.11 and epsilon_ask = 0.21 
 class Agent2:
     _ids = count(0)
 
@@ -15,8 +16,8 @@ class Agent2:
         self.inventory = [0]
         self.trades = [] #record of trade with volume at each timestep 
         #set random epsilons based on emax
-        self.epsilon_bid = (random.uniform(0, self.emax))
-        self.epsilon_ask = (random.uniform(0, self.emax))
+        self.epsilon_bid = 0.11
+        self.epsilon_ask = 0.21
         return
 
     def settle(self,sellOrder, bid, buyWinner, buyOrder, ask, sellWinner):
