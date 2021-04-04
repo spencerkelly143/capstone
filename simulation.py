@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #simulation configuration
 step = 1
-time = 10000000
+time = 2000000
 steps = time/step
 numCompetitors = 5
 emax = 0.3 # updated to be more realistic/useful
@@ -24,7 +24,7 @@ refPriceConfig = {
 
 #Qlearner configuration
 qConfig = {
-    "mu": 0.8, #exploration coefficient (%80 of time it is greedy) *change this
+    "mu": 0.6, #exploration coefficient (%80 of time it is greedy) *change this
     "gamma": 0.999, #discount factor (should be ~1 due to high number of timesteps)
     "alpha": 0.4, #learning rate
     "nudge": 0.01, # nudge constant for epsilon_bid and epsilon_ask
@@ -63,7 +63,7 @@ done = False
 while(not done):
     #get current state variables
     currentTimeStep = env.getCurrentTimeStep()
-    if(currentTimeStep%1000==0):
+    if(currentTimeStep%100000==0):
         print(currentTimeStep)
 
     price = env.getCurrentRefPrice()
@@ -180,12 +180,12 @@ def plotResults():
     plt.grid(True)
 
     #plot Qlearner
-    plt.figure(numCompetitors+1)
-    plt.plot(Qagent.rewards)
-    plt.ylabel('Volume')
-    plt.xlabel('Timestep')
-    plt.title('QL rewards activity')
-    plt.grid(True)
+    # plt.figure(numCompetitors+1)
+    # plt.plot(Qagent.rewards)
+    # plt.ylabel('Volume')
+    # plt.xlabel('Timestep')
+    # plt.title('QL rewards activity')
+    # plt.grid(True)
 
     # plot Qlearner learning curve
     plt.figure(numCompetitors+2)
@@ -212,6 +212,7 @@ plotResults()
 profitTotal = 0
 for i in range(0,int(steps)):
     profitTotal = profitTotal + (Qagent.profit[i+1]-Qagent.profit[i])*(qConfig["gamma"])**i
-     
+
 print("Total Discounted Profit: ", profitTotal)
 print("Total Non-Discounted Profit: ", Qagent.profit[-1])
+print("Number of trades: ", sum([abs(i) for i in Qagent.trades]))

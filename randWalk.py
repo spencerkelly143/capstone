@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def randWalk(N, drift, volatility, initValue):
-
+    np.random.seed(40)
     Z=np.random.normal(drift, volatility, N)
     price = np.cumsum(Z) + initValue
     print("Ref Price array:")

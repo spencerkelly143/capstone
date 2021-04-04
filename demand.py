@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def demand(Size):
+    print("HAHFDAHSFHADS")
     """
     buyfl/sellfl:  generates normally distributed array of floats. multiply by 40 to
                     get values around 40.
@@ -16,5 +17,5 @@ def demand(Size):
     buyfl = npr.randn(int(Size+1))*40        #generates normally distributed array
     buy = np.array([int(abs(x)%101) for x in buyfl])
     sellfl = npr.randn(int(Size+1))*40
-    sell = np.array([int(abs(x)%100) for x in sellfl])
+    sell = np.array([int(abs(x)%101) for x in sellfl])
     return buy, sell

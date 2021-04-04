@@ -278,7 +278,7 @@ class AgentQ():
         # print("Action index: ")
         # print(actionIndex)
         gamma = self.qLearningConfig["gamma"] #discount factor 0.99
-        alpha = self.qLearningConfig["alpha"] #learning rate 0.4
+        alpha =self.qLearningConfig["alpha"]  #learning rate 0.4
 
 
 
@@ -305,8 +305,7 @@ class AgentQ():
         #this may be deprecated, not sure
         #(new action vector - old action vector) * reward + gamme^timestep
         Qold = self.actions[-1][1]
-        self.learningCurve.append(Qnew-Qold)
-
+        self.learningCurve.append(((Qnew-Qold)*100)/Qold)
         updateIndex = self.states[-1]
         updateIndex.append(self.actions[-1][0])
         #update Q for the right action index with the new q value
