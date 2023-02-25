@@ -1,4 +1,5 @@
 # Capstone
+In this project, we designed an agent to learn to maximize profits in a financial markets by "market-making", that is posting simulatenous bid and offer prices. We designed the problem as a Markov Decision Process and used Q-Learning to teach our agent an optimal policy to maximize it's profits.
 
 ## Running simulation
 Ensure that you have git and Python3 installed. Clone the git repo, enter the directory.
